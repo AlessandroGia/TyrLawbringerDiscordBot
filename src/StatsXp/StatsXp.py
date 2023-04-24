@@ -106,14 +106,13 @@ class StatsXp:
         await self.__send_notification(interaction, index, points)
 
     async def exp(self, ctx: Message) -> None:
-        if ctx.author.id == 518039812607967265:
-            self.__update_user_points(ctx.author.id, ctx.guild.id)
-            self.__add_point(ctx.author.id, ctx.guild.id)
-            curr_index = self.__get_index(self.__tree[ctx.author.id][ctx.guild.id]['points'])
-            if curr_index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
-                self.__tree[ctx.author.id][ctx.guild.id]['index'] = curr_index
-                await self.__send_notification(ctx, curr_index)
-                await self.__change_role(ctx.author, ctx.guild, curr_index)
+        self.__update_user_points(ctx.author.id, ctx.guild.id)
+        self.__add_point(ctx.author.id, ctx.guild.id)
+        curr_index = self.__get_index(self.__tree[ctx.author.id][ctx.guild.id]['points'])
+        if curr_index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
+            self.__tree[ctx.author.id][ctx.guild.id]['index'] = curr_index
+            await self.__send_notification(ctx, curr_index)
+            await self.__change_role(ctx.author, ctx.guild, curr_index)
 
     async def __send_notification(self, ctx: Message | Interaction, i: int, points: int = None):
         if i:
@@ -185,15 +184,15 @@ class StatsXp:
             'id_role': None
         },
         1: {
-            'points': 5,
+            'points': 100,
             'id_role': 1099149090744451073
         },
         2: {
-            'points': 10,
+            'points': 200,
             'id_role': 1099149715964174416
         },
         3: {
-            'points': 15,
+            'points': 300,
             'id_role': 1099149782930423898
         },
         4: {
