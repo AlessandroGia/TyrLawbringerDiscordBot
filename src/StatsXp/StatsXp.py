@@ -12,7 +12,7 @@ class StatsXp:
 
     def __init__(self) -> None:
         self.__redis = redis.Redis(
-            host='localhost',
+            host='db',
             port=6379,
             decode_responses=True
         )
