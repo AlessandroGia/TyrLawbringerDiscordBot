@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  bot:
+    container_name: tyr_lawbringer
+    build: .
+    networks:
+      - network
+    depends_on:
+      - db
+  db:
+    image: redis:7.0.11
+    ports:
+      - 6379:6379
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
