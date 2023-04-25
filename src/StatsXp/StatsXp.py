@@ -12,7 +12,7 @@ class StatsXp:
 
     def __init__(self) -> None:
         self.__redis = redis.Redis(
-            host='db',
+            host='localhost',
             port=6379,
             decode_responses=True
         )
@@ -86,97 +86,110 @@ class StatsXp:
 
     async def get_user_points(self, interaction: Interaction):
         self.__update_user_points(interaction.user.id, interaction.guild.id)
-        await self.__send_notification(
+        await self.__send_mess(
             interaction,
             self.__tree[interaction.user.id][interaction.guild.id]['index'],
-            self.__tree[interaction.user.id][interaction.guild.id]['points']
+            points=self.__tree[interaction.user.id][interaction.guild.id]['points']
         )
 
-    async def set_user_points(self, interaction: Interaction, id_user: str, points: int):
-        self.__update_user_points(interaction.user.id, interaction.guild.id)
-        self.__set_user_points_db(int(id_user), interaction.guild.id, points)
+    async def set_user_points(self, interaction: Interaction, id_user: int, points: int):
+        self.__update_user_points(id_user, interaction.guild.id)
+        self.__set_user_points_db(id_user, interaction.guild.id, points)
         index = self.__get_index(points)
-        self.__tree[int(id_user)][interaction.guild.id]['points'] = points
-        self.__tree[int(id_user)][interaction.guild.id]['index'] = index
+        self.__tree[id_user][interaction.guild.id]['points'] = points
+        self.__tree[id_user][interaction.guild.id]['index'] = index
         await self.__change_role(
-            interaction.user,
+            interaction.guild.get_member(id_user),
             interaction.guild,
-            self.__tree[interaction.user.id][interaction.guild.id]['index']
+            self.__tree[id_user][interaction.guild.id]['index']
         )
-        await self.__send_notification(interaction, index, points)
+        await self.__send_mess(
+            interaction,
+            index,
+            user=interaction.guild.get_member(id_user)
+        )
 
     async def exp(self, ctx: Message) -> None:
         self.__update_user_points(ctx.author.id, ctx.guild.id)
         self.__add_point(ctx.author.id, ctx.guild.id)
-        curr_index = self.__get_index(self.__tree[ctx.author.id][ctx.guild.id]['points'])
-        if curr_index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
-            self.__tree[ctx.author.id][ctx.guild.id]['index'] = curr_index
-            await self.__send_notification(ctx, curr_index)
-            await self.__change_role(ctx.author, ctx.guild, curr_index)
+        index = self.__get_index(self.__tree[ctx.author.id][ctx.guild.id]['points'])
+        if index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
+            self.__tree[ctx.author.id][ctx.guild.id]['index'] = index
+            await self.__send_lvl_up(ctx, index)
+            await self.__change_role(ctx.author, ctx.guild, index)
 
-    async def __send_notification(self, ctx: Message | Interaction, i: int, points: int = None):
-        if i:
-            if not isinstance(ctx, Interaction):
-                role_name = ctx.guild.get_role(self.__STATS[i]['id_role']).name
-                user_name = ctx.author.name
-            else:
-                role_name = ctx.guild.get_role(self.__STATS[i]['id_role']).name + f' - {points}pt.'
-                user_name = ctx.user.name
-            img = ''
-            rgb = (0, 0, 0)
-            if 1 <= i <= 5:
-                img = self.__img_bronze
-                rgb = (205, 127, 50)
-            elif 6 <= i <= 10:
-                img = self.__img_silver
-                rgb = (192, 192, 192)
-            elif 11 <= i <= 15:
-                img = self.__img_gold
-                rgb = (255, 215, 0)
-            elif 16 <= i <= 20:
-                img = self.__img_platinum
-                rgb = (229, 228, 226)
-            elif 21 <= i <= 25:
-                img = self.__img_diamond
-                rgb = (185, 242, 255)
-            elif i == 26:
-                img = self.__img_master
-                rgb = (138, 43, 226)
-            elif i == 27:
-                img = self.__img_grandmaster
-                rgb = (255, 255, 255)
-
-            len_name, len_rank = len(user_name) * 10, len(role_name) * 6
-
-            if len_rank < len_name:
-                len_w = len_name
-            else:
-                len_w = len_rank
-
-            img_w, img_h = img.size
-            background = Image.new('RGBA', (150 + len_w, img_h), rgb)
-            font_color = tuple([x - j for x, j in zip((255, 255, 255), rgb)])
-            smite_font = ImageFont.truetype(os.path.join(self.__root, 'Font', 'PenumbraHalfSerifStd-SeBd.otf'), 15)
-            l_user = ImageDraw.Draw(background)
-            l_user.text((img_w + 10, 10), user_name, font=smite_font, fill=font_color)
-            smite_font = ImageFont.truetype(os.path.join(self.__root, 'Font', 'PenumbraHalfSerifStd-Bold.otf'), 10)
-            l_rank = ImageDraw.Draw(background)
-            l_rank.text((img_w + 10, img_h - 20), role_name, font=smite_font, fill=font_color)
-            background.paste(img)
-            with io.BytesIO() as image_binary:
-                background.save(image_binary, 'PNG')
-                image_binary.seek(0)
-                if not isinstance(ctx, Interaction):
-                    await ctx.channel.send(content=f'{ctx.author.mention} Nice Job!', file=File(fp=image_binary, filename='image.png'))
-                else:
-                    content = ctx.user.mention
-                    if i < 27:
-                        content += f" ***{self.__STATS[int(self.__tree[ctx.user.id][ctx.guild.id]['index']) + 1]['points'] - self.__tree[ctx.user.id][ctx.guild.id]['points']}pt.*** left to rank up to **{ctx.guild.get_role(self.__STATS[i + 1]['id_role']).name}**."
-                    await ctx.response.send_message(content=content, file=File(fp=image_binary, filename='image.png'))
-        else:
-            await ctx.response.send_message(
-                content=f"{ctx.user.mention} ***{self.__STATS[int(self.__tree[ctx.user.id][ctx.guild.id]['index']) + 1]['points'] - self.__tree[ctx.user.id][ctx.guild.id]['points']}pt.*** left to rank up to **{ctx.guild.get_role(self.__STATS[i + 1]['id_role']).name}**."
+    async def __send_lvl_up(self, ctx: Message, index: int) -> None:
+        role_name = ctx.guild.get_role(self.__STATS[index]['id_role']).name
+        user_name = ctx.author.name
+        img = self.__create_image(role_name, user_name, index)
+        with io.BytesIO() as image_binary:
+            img.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            await ctx.channel.send(
+                content=f'{ctx.author.mention} Nice Job!',
+                file=File(fp=image_binary, filename='image.png')
             )
+
+    async def __send_mess(self, interaction: Interaction, index: int, **kwargs):
+        guild_id = interaction.guild.id
+        user: Member = interaction.user
+        if _user := kwargs.get('user'):
+            user = _user
+        user_id = user.id
+        if index:
+            role_name = interaction.guild.get_role(self.__STATS[index]['id_role']).name
+            if points := kwargs.get('points'):
+                role_name += f' - {points}pt.'
+            user_name = user.name
+            img = self.__create_image(role_name, user_name, index)
+            with io.BytesIO() as image_binary:
+                img.save(image_binary, 'PNG')
+                image_binary.seek(0)
+                content = user.mention
+                if index < 27:
+                    content += f" ***{self.__STATS[int(self.__tree[user_id][guild_id]['index']) + 1]['points'] - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__STATS[index + 1]['id_role']).name}**."
+                await interaction.response.send_message(
+                    content=content,
+                    file=File(fp=image_binary, filename='image.png')
+                )
+        else:
+            await interaction.response.send_message(
+                content=f"{user.mention} ***{self.__STATS[int(self.__tree[user_id][guild_id]['index']) + 1]['points'] - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__STATS[index + 1]['id_role']).name}**."
+            )
+
+    def __create_image(self, role_name: str, user_name: str, index: int):
+        len_name, len_rank = len(user_name) * 10, len(role_name) * 6
+        len_w = len_name if len_name > len_rank else len_rank
+        img, rgb = self.__get_image_color_rank(index)
+        img_w, img_h = img.size
+        image = Image.new('RGBA', (150 + len_w, img_h), rgb)
+        font_color = tuple([x - j for x, j in zip((255, 255, 255), rgb)])
+        smite_font = ImageFont.truetype(os.path.join(self.__root, 'Font', 'PenumbraHalfSerifStd-SeBd.otf'), 15)
+        l_user = ImageDraw.Draw(image)
+        l_user.text((img_w + 10, 10), user_name, font=smite_font, fill=font_color)
+        smite_font = ImageFont.truetype(os.path.join(self.__root, 'Font', 'PenumbraHalfSerifStd-Bold.otf'), 10)
+        l_rank = ImageDraw.Draw(image)
+        l_rank.text((img_w + 10, img_h - 20), role_name, font=smite_font, fill=font_color)
+        image.paste(img)
+        return image
+
+    def __get_image_color_rank(self, index: int) -> (Image, (int, int, int)):
+        if 1 <= index <= 5:
+            return self.__img_bronze, (205, 127, 50)
+        elif 6 <= index <= 10:
+            return self.__img_silver, (192, 192, 192)
+        elif 11 <= index <= 15:
+            return self.__img_gold, (255, 215, 0)
+        elif 16 <= index <= 20:
+            return self.__img_platinum, (229, 228, 226)
+        elif 21 <= index <= 25:
+            return self.__img_diamond, (185, 242, 255)
+        elif index == 26:
+            return self.__img_master, (138, 43, 226)
+        elif index == 27:
+            return self.__img_grandmaster,  (255, 255, 255)
+        else:
+            return '', (0, 0, 0)
 
     __STATS = {
         0: {

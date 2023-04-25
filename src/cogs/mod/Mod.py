@@ -31,7 +31,7 @@ class Law(ext.commands.Cog):
 
     @app_commands.command(
         name='setpoints',
-        description='Set user points.',
+        description='Set user points.'
     )
     @app_commands.describe(
         id='User id',
@@ -39,7 +39,7 @@ class Law(ext.commands.Cog):
     )
     async def setpoints(self, interaction: Interaction, id: str, points: int):
         if self.__is_owner(interaction):
-            await self.__stats.set_user_points(interaction, id, points)
+            await self.__stats.set_user_points(interaction, int(id), points)
 
     @app_commands.command(
         name='points',
