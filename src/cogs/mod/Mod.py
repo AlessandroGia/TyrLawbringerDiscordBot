@@ -48,16 +48,14 @@ class Law(ext.commands.Cog):
     async def points(self, interaction: Interaction):
         await self.__stats.get_user_points(interaction)
 
-    async def __set_afk(self, channel: discord.TextChannel, members: [Member]):
-        for member in members:
-            if member.id == 518039812607967265:
-                status = member.status
-                if status == self.__idle or status == self.__offline:
-                    await channel.send('Wait!')
+    async def __set_afk(self, message: Message):
+        owner: Member = message.guild.get_member(message.guild.owner_id)
+        if owner.id != message.author.id and (owner.status == self.__idle or owner.status == self.__offline):
+            await message.channel.send(self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)])
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
-        await self.__set_afk(message.channel, message.mentions)
+        await self.__set_afk(message)
         await self.__stats.exp(message)
 
     @commands.Cog.listener()
@@ -65,12 +63,12 @@ class Law(ext.commands.Cog):
         role = discord.utils.get(member.guild.roles, name='Yokai')
         channel = member.guild.get_channel(1098908138570256464)
         await member.add_roles(role)
-        await channel.send(f'{member.mention} {self.__quotes_on_join[r(0, len(self.__quotes_on_join)-1)]}')
+        await channel.send(f'{member.mention} {self.__quotes_on_join[r(0, len(self.__quotes_on_join) - 1)]}')
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: Member):
         channel = member.guild.get_channel(1098908138570256464)
-        await channel.send(f'{member.name} {self.__quotes_on_leave[r(0, len(self.__quotes_on_leave)-1)]}')
+        await channel.send(f'{member.name} {self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)]}')
 
     @commands.Cog.listener()
     async def on_member_ban(self, member: Member):
