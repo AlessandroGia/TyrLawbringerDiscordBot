@@ -1,17 +1,15 @@
-import discord
-
-from discord import Object, Interaction, app_commands, ext, Message, Member, InteractionResponse
-from random import randint as r
-from discord.ext import commands
-
+from discord import Object, Interaction, app_commands, ext, Message, Member
 from src.StatsXp.StatsXp import StatsXp
+from discord.ext import commands
+from random import randint as r
+
+
+import discord
 
 
 class Law(ext.commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.__bot: commands.Bot = bot
-        self.__idle: discord.Status = discord.Status.idle
-        self.__offline: discord.Status = discord.Status.offline
         self.__stats: StatsXp = StatsXp()
         self.__quotes_on_leave: list = [
             "No, that's no.", "That\'s no funny.", "Idiocy is not a defense.", "You cannot stop justice!",
@@ -28,6 +26,9 @@ class Law(ext.commands.Cog):
     @staticmethod
     def __is_owner(interaction: Interaction):
         return interaction.user.id == interaction.guild.owner.id
+
+    def __id_bot(self, interaction: Interaction):
+        return interaction.user.id == self.__bot.application_id
 
     @app_commands.command(
         name='setpoints',
@@ -50,13 +51,23 @@ class Law(ext.commands.Cog):
 
     async def __set_afk(self, message: Message):
         author_id: int = message.author.id
-        owner: Member = message.guild.get_member(message.guild.owner_id)
-        if self.__bot.application_id != author_id and owner.id != author_id and (owner.status == self.__idle or owner.status == self.__offline):
+        owner: Member = message.guild.owner
+        if self.__bot.application_id != author_id and owner.id != author_id and (
+                owner.status == discord.Status.idle or owner.status == discord.Status.offline or owner.status == discord.Status.dnd
+        ):
             await message.channel.send(self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)])
+
+    async def __ping_bot(self, message: Message):
+        if self.__bot.application.id in [mem.id for mem in message.mentions] and not self.__bot.application_id == message.author.id:
+            if message.author.id == message.guild.owner_id:
+                await message.channel.send(f'{message.author.mention} HAI!')
+            else:
+                await message.channel.send(f'{message.author.mention} {self.__quotes_on_ban[r(0, len(self.__quotes_on_ban) - 1)]}')
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
         await self.__set_afk(message)
+        await self.__ping_bot(message)
         await self.__stats.exp(message)
 
     @commands.Cog.listener()
