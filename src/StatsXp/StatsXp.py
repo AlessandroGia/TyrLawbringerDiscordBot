@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import discord
 from discord import Message, File, Interaction, Member, Guild
 from PIL import Image, ImageDraw, ImageFont
 
@@ -11,12 +12,13 @@ import os
 class StatsXp:
 
     def __init__(self) -> None:
+
         self.__redis = redis.Redis(
             host='localhost',
             port=6379,
             decode_responses=True
         )
-        self.__set_user_points_db(518039812607967265, 928785387239915540, 0)
+        #self.__set_user_points_db(518039812607967265, 928785387239915540, 0)
         self.__roles_id = [stat['id_role'] for stat in self.__STATS.values()]
         self.__tree = {}
         self.__root = os.path.dirname(os.path.abspath(__file__))
@@ -93,20 +95,21 @@ class StatsXp:
         )
 
     async def set_user_points(self, interaction: Interaction, id_user: int, points: int):
+        member = interaction.guild.get_member(id_user)
         self.__update_user_points(id_user, interaction.guild.id)
         self.__set_user_points_db(id_user, interaction.guild.id, points)
         index = self.__get_index(points)
         self.__tree[id_user][interaction.guild.id]['points'] = points
         self.__tree[id_user][interaction.guild.id]['index'] = index
         await self.__change_role(
-            interaction.guild.get_member(id_user),
+            member,
             interaction.guild,
             self.__tree[id_user][interaction.guild.id]['index']
         )
         await self.__send_mess(
             interaction,
             index,
-            user=interaction.guild.get_member(id_user)
+            user=member
         )
 
     async def exp(self, ctx: Message) -> None:

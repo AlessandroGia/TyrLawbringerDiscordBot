@@ -10,11 +10,15 @@ class TyrLawbringer(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or('!'),
             intents=Intents.all(),
-            activity=Activity(type=ActivityType.competing, name="Law")
+            activity=Activity(
+                type=ActivityType.competing,
+                name="Law"
+            )
         )
 
     async def setup_hook(self) -> None:
         await self.load_extension(f"src.cogs.mod.Mod")
+        #await self.load_extension(f"src.cogs.voicestate.CVoiceChannel")
 
     async def on_ready(self) -> None:
         await self.tree.sync(guild=Object(id=928785387239915540))

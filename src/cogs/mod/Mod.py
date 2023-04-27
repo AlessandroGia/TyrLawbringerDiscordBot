@@ -49,8 +49,9 @@ class Law(ext.commands.Cog):
         await self.__stats.get_user_points(interaction)
 
     async def __set_afk(self, message: Message):
+        author_id: int = message.author.id
         owner: Member = message.guild.get_member(message.guild.owner_id)
-        if owner.id != message.author.id and (owner.status == self.__idle or owner.status == self.__offline):
+        if self.__bot.application_id != author_id and owner.id != author_id and (owner.status == self.__idle or owner.status == self.__offline):
             await message.channel.send(self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)])
 
     @commands.Cog.listener()
