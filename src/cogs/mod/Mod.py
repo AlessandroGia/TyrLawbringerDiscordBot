@@ -54,7 +54,7 @@ class Law(ext.commands.Cog):
         owner: Member = message.guild.owner
         if self.__bot.application_id != author_id and owner.id != author_id and (
                 owner.status == discord.Status.idle or owner.status == discord.Status.offline or owner.status == discord.Status.dnd
-        ):
+        ) and owner in message.mentions:
             await message.channel.send(self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)])
 
     async def __ping_bot(self, message: Message):
