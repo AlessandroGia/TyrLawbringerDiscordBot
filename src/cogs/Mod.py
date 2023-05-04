@@ -12,9 +12,14 @@ class Law(ext.commands.Cog):
         self.__bot: commands.Bot = bot
         self.__leveling: Leveling = Leveling()
         self.__quotes: Quotes = Quotes()
+        self.__leveling: Leveling = Leveling()
 
         self.__channel_bot: int = 1098908138570256464
         self.__role_join: str = 'Yokai'
+
+    @staticmethod
+    def __not_permitted(interaction: Interaction):
+        await interaction.response.send_message("That's no funny!", ephemeral=True)
 
     @staticmethod
     def __is_owner(interaction: Interaction) -> bool:
@@ -31,16 +36,20 @@ class Law(ext.commands.Cog):
         id='User id',
         points='Number of points'
     )
+    @app_commands.check(__is_owner)
     async def set_points(self, interaction: Interaction, id: str, points: int) -> None:
-        if self.__is_owner(interaction):
-            await self.__stats.set_user_points(interaction, int(id), points)
+        await self.__leveling.set_user_points(interaction, int(id), points)
+
+    @set_points.error
+    async def points_error(self, interaction: Interaction, error):
+        self.__not_permitted(interaction)
 
     @app_commands.command(
         name='points',
         description='Get user points.'
     )
     async def points(self, interaction: Interaction) -> None:
-        await self.__stats.get_user_points(interaction)
+        await self.__leveling.get_user_points(interaction)
 
     async def __set_afk(self, message: Message) -> None:
         author_id: int = message.author.id

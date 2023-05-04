@@ -3,7 +3,7 @@ import redis
 class Idb:
     def __init__(self):
         self.__redis = redis.Redis(
-            host='localhost',
+            host='db',
             port=6379,
             decode_responses=True
         )

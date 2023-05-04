@@ -7,7 +7,7 @@ class StatsInfo:
 
     def get_index_by_points(self, points: int) -> int:
         for x in self.__stats:
-            if x == (len(self.__stats) - 1) or points < self.__STATS[x + 1]['points']:
+            if x == (len(self.__stats) - 1) or points < self.__stats[x + 1]['points']:
                 return x
 
     def get_role_by_index(self, index: int) -> int:

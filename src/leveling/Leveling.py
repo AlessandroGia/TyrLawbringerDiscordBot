@@ -1,5 +1,4 @@
 from discord import Message, File, Interaction, Member, Guild
-from __future__ import annotations
 
 from src.leveling.StatsInfo import StatsInfo
 from src.leveling.Images import Images
@@ -117,14 +116,14 @@ class Leveling:
                 image_binary.seek(0)
                 content = user.mention
                 if index < 27:
-                    content += f" ***{self.__stats.get_points_by_index(self.__tree[user_id][guild_id]['index'] + 1) - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__STATS[index + 1]['id_role']).name}**."
+                    content += f" ***{self.__stats.get_points_by_index(self.__tree[user_id][guild_id]['index'] + 1) - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__stats.get_role_by_index(index + 1)).name}**."
                 await interaction.response.send_message(
                     content=content,
                     file=File(fp=image_binary, filename='image.png')
                 )
         else:
             await interaction.response.send_message(
-                content=f"{user.mention} ***{self.__stats.get_points_by_index(self.__tree[user_id][guild_id]['index'] + 1) - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__STATS[index + 1]['id_role']).name}**."
+                content=f"{user.mention} ***{self.__stats.get_points_by_index(self.__tree[user_id][guild_id]['index'] + 1) - self.__tree[user_id][guild_id]['points']}pt.*** left to rank up to **{interaction.guild.get_role(self.__stats.get_role_by_index(index + 1)).name}**."
             )
 
 

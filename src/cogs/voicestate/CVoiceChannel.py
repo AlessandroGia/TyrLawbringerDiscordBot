@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from discord import ext, Object, Member, VoiceState, VoiceClient
 from discord.ext import commands, tasks
