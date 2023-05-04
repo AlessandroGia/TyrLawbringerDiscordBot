@@ -1,27 +1,20 @@
 from discord import Object, Interaction, app_commands, ext, Message, Member
-from src.StatsXp.StatsXp import StatsXp
+from src.leveling.Leveling import Leveling
 from discord.ext import commands
-from random import randint as r
-
 
 import discord
+
+from src.quotes.Quotes import Quotes
 
 
 class Law(ext.commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.__bot: commands.Bot = bot
-        self.__stats: StatsXp = StatsXp()
-        self.__quotes_on_leave: list = [
-            "No, that's no.", "That\'s no funny.", "Idiocy is not a defense.", "You cannot stop justice!",
-            "Begone foul creature!", "The wicked fall before me!",
-        ]
-        self.__quotes_on_join: list = [
-            "HAI!"
-        ]
-        self.__quotes_on_ban: list = [
-            "We don't have time for jokes!", "You chose this, remember that.",
-            "I take no joy in what must be done!"
-        ]
+        self.__leveling: Leveling = Leveling()
+        self.__quotes: Quotes = Quotes()
+
+        self.__channel_bot: int = 1098908138570256464
+        self.__role_join: str = 'Yokai'
 
     @staticmethod
     def __is_owner(interaction: Interaction):
@@ -31,14 +24,14 @@ class Law(ext.commands.Cog):
         return interaction.user.id == self.__bot.application_id
 
     @app_commands.command(
-        name='setpoints',
+        name='set-points',
         description='Set user points.'
     )
     @app_commands.describe(
         id='User id',
         points='Number of points'
     )
-    async def setpoints(self, interaction: Interaction, id: str, points: int):
+    async def set_points(self, interaction: Interaction, id: str, points: int):
         if self.__is_owner(interaction):
             await self.__stats.set_user_points(interaction, int(id), points)
 
@@ -55,37 +48,35 @@ class Law(ext.commands.Cog):
         if self.__bot.application_id != author_id and owner.id != author_id and (
                 owner.status == discord.Status.idle or owner.status == discord.Status.offline or owner.status == discord.Status.dnd
         ) and owner in message.mentions:
-            await message.channel.send(self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)])
+            await message.channel.send(
+                f'{message.author.mention} {self.__quotes.get_random(self.__quotes.quotes_on_leave)}'
+            )
 
     async def __ping_bot(self, message: Message):
         if self.__bot.application.id in [mem.id for mem in message.mentions] and not self.__bot.application_id == message.author.id:
             if message.author.id == message.guild.owner_id:
                 await message.channel.send(f'{message.author.mention} HAI!')
             else:
-                await message.channel.send(f'{message.author.mention} {self.__quotes_on_ban[r(0, len(self.__quotes_on_ban) - 1)]}')
-
-    @commands.Cog.listener()
-    async def on_message(self, message: Message):
-        await self.__set_afk(message)
-        await self.__ping_bot(message)
-        await self.__stats.exp(message)
+                await message.channel.send(
+                    f'{message.author.mention} {self.__quotes.get_random(self.__quotes.quotes_on_ban)}'
+                )
 
     @commands.Cog.listener()
     async def on_member_join(self, member: Member):
-        role = discord.utils.get(member.guild.roles, name='Yokai')
-        channel = member.guild.get_channel(1098908138570256464)
+        role = discord.utils.get(member.guild.roles, name=self.__role_join)
+        channel = member.guild.get_channel(self.__channel_bot)
         await member.add_roles(role)
-        await channel.send(f'{member.mention} {self.__quotes_on_join[r(0, len(self.__quotes_on_join) - 1)]}')
+        await channel.send(f'{member.mention} {self.__quotes.get_random(self.__quotes.quotes_on_join)}')
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: Member):
-        channel = member.guild.get_channel(1098908138570256464)
-        await channel.send(f'{member.name} {self.__quotes_on_leave[r(0, len(self.__quotes_on_leave) - 1)]}')
+        channel = member.guild.get_channel(self.__channel_bot)
+        await channel.send(f'{member.name} {self.__quotes.get_random(self.__quotes.quotes_on_leave)}')
 
     @commands.Cog.listener()
     async def on_member_ban(self, member: Member):
-        channel = member.guild.get_channel(1098908138570256464)
-        await channel.send(f'{member.name} {self.__quotes_on_ban[r(0, len(self.__quotes_on_ban) - 1)]}')
+        channel = member.guild.get_channel(self.__channel_bot)
+        await channel.send(f'{member.name} {self.__quotes.get_random(self.__quotes.quotes_on_ban)}')
 
 
 async def setup(bot: ext.commands.Bot):

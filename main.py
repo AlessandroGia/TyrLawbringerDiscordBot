@@ -17,12 +17,25 @@ class TyrLawbringer(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
-        await self.load_extension(f"src.cogs.mod.Mod")
-        #await self.load_extension(f"src.cogs.voicestate.CVoiceChannel")
+        await self.load_cogs()
 
     async def on_ready(self) -> None:
         await self.tree.sync(guild=Object(id=928785387239915540))
         print("{} si e' connesso a discord!".format(self.user))
+
+    async def load_cogs(self) -> None:
+        init: str = '__init__.py'
+        root: str = os.path.dirname(os.path.abspath(__file__))
+        files: list[str] = os.listdir(os.path.join(root, 'src', 'cogs'))
+        if init in files:
+            files.remove(init)
+        for file in files:
+            if file.endswith('.py'):
+                try:
+                    await self.load_extension(f'src.cogs.{file[:-3]}')
+                    print(file[:-3], 'Loaded')
+                except Exception as e:
+                    print(file[:-3], f'Not loaded: {e}')
 
 
 if __name__ == "__main__":
