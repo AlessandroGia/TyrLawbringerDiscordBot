@@ -24,6 +24,7 @@ class TyrLawbringer(commands.Bot):
         print("{} si e' connesso a discord!".format(self.user))
 
     async def load_cogs(self) -> None:
+        print('A')
         init: str = '__init__.py'
         root: str = os.path.dirname(os.path.abspath(__file__))
         files: list[str] = os.listdir(os.path.join(root, 'src', 'cogs'))
