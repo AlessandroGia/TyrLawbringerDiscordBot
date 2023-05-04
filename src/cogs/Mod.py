@@ -18,7 +18,7 @@ class Law(ext.commands.Cog):
         self.__role_join: str = 'Yokai'
 
     @staticmethod
-    def __not_permitted(interaction: Interaction):
+    async def __not_permitted(interaction: Interaction):
         await interaction.response.send_message("That's no funny!", ephemeral=True)
 
     @staticmethod
