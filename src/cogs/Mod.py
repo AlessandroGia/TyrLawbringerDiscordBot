@@ -74,7 +74,7 @@ class Law(ext.commands.Cog):
     async def on_message(self, message: Message) -> None:
         await self.__set_afk(message)
         await self.__ping_bot(message)
-        await self.__leveling.exp(message)
+        await self.__leveling.exp(message, self.__bot.application_id)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: Member) -> None:

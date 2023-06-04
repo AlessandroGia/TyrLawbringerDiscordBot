@@ -41,14 +41,15 @@ class Leveling:
             user=member
         )
 
-    async def exp(self, ctx: Message) -> None:
-        self.__update_user_points(ctx.author.id, ctx.guild.id)
-        self.__add_point(ctx.author.id, ctx.guild.id)
-        index = self.__stats.get_index_by_points(self.__tree[ctx.author.id][ctx.guild.id]['points'])
-        if index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
-            self.__tree[ctx.author.id][ctx.guild.id]['index'] = index
-            await self.__send_lvl_up(ctx, index)
-            await self.__change_role(ctx.author, ctx.guild, index)
+    async def exp(self, ctx: Message, bot_id: int) -> None:
+        if ctx.author.id != bot_id:
+            self.__update_user_points(ctx.author.id, ctx.guild.id)
+            self.__add_point(ctx.author.id, ctx.guild.id)
+            index = self.__stats.get_index_by_points(self.__tree[ctx.author.id][ctx.guild.id]['points'])
+            if index != self.__tree[ctx.author.id][ctx.guild.id]['index']:
+                self.__tree[ctx.author.id][ctx.guild.id]['index'] = index
+                await self.__send_lvl_up(ctx, index)
+                await self.__change_role(ctx.author, ctx.guild, index)
 
     def __add_point(self, id_user: int, id_guild: int) -> None:
         self.__tree[id_user][id_guild]['points'] += 1
