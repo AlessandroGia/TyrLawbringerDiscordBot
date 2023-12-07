@@ -11,25 +11,24 @@ class CVoiceState:
     def connected(self):
         return self.__vc and self.__vc.is_connected()
 
-    def __connect(self, channel: VoiceChannel):
+    async def __connect(self, channel: VoiceChannel):
         print('A')
         if not self.__vc or not self.__vc.is_connected():
             print('B')
-            self.__vc = self.__loop.create_task(channel.connect())
-            self.__vc.cancel()
-            self.__vc.done()
-
+            await self.__vc.connect()
+            print('AA')
 
 
     async def disconnect(self):
-        if self.is_connected():
+        if self.connected():
             await self.__vc.disconnect()
 
     async def join(self, channel: VoiceChannel):
+        self.__vc = channel
         print('-----', self.__vc)
         if not self.__vc or not self.__vc.is_connected():
             print('3')
-            self.__connect(channel)
+            await self.__connect(channel)
             print('4')
         else:
             print('5')
