@@ -1,6 +1,8 @@
 from asyncio import AbstractEventLoop
 
-from discord import VoiceClient, VoiceChannel
+from discord import VoiceClient, VoiceChannel, VoiceProtocol
+
+from src.voicestate.events.VoiceclientEvents import *
 
 
 class CVoiceState:
@@ -11,26 +13,20 @@ class CVoiceState:
     def connected(self):
         return self.__vc and self.__vc.is_connected()
 
-    async def __connect(self, channel: VoiceChannel):
-        print('A')
-        if not self.__vc or not self.__vc.is_connected():
-            print('B')
-            await self.__vc.connect()
-            print('AA')
-
-
     async def disconnect(self):
         if self.connected():
             await self.__vc.disconnect()
 
-    async def join(self, channel: VoiceChannel):
+    async def channel_event(self, channel: VoiceChannel, event: Join | Leave):
         self.__vc = channel
-        print('-----', self.__vc)
-        if not self.__vc or not self.__vc.is_connected():
-            print('3')
-            await self.__connect(channel)
-            print('4')
+        vc = channel.guild.voice_client
+        print(vc.is_connected())
+        if isinstance(event, Join):
+            ...
+        elif isinstance(event, Leave):
+            ...
+
+        if not vc or not vc.is_connected():
+            await self.__vc.connect()
         else:
-            print('5')
-            await self.__vc.move_to(channel)
-            print('6')
+            await vc.move_to(channel)

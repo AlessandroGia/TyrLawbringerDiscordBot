@@ -16,8 +16,8 @@ class VoiceChannelCog(ext.commands.Cog):
     # {'member': member, 'state': state}
     #TODO: Fare una coda asincrona che tiene conto le varie operazione che il bot deve fare
     def __init__(self, bot: ext.commands.Bot):
-        #self.__voice_state = CVoiceState(bot.loop)
-        #self.__queue = CQueue()
+        self.__voice_state = CVoiceState(bot.loop)
+        self.__queue = CQueue()
         self.__vc: VoiceClient | None = None
         self.__bot = bot
         #
@@ -55,7 +55,7 @@ class VoiceChannelCog(ext.commands.Cog):
 
     @ext.commands.Cog.listener()
     async def on_ready(self):
-        #self.__run.start()
+        self.__run.start()
         ...
 
     @app_commands.command(
@@ -80,40 +80,31 @@ class VoiceChannelCog(ext.commands.Cog):
     @tasks.loop()
     async def __run(self):
         while True:
-            print('Waiting')
             element = await asyncio.wait_for(self.__queue.get(), timeout=None)
-            print('Event!')
             await self.__on_user_event(element['state'], element['event'])
 
     async def __on_user_event(self, state: VoiceState, event: Join | Leave):
-        print('1')
         if state.channel.members:
-            print('2')
             if self.__bot.application.id not in [m.id for m in state.channel.members]:
-                await self.__voice_state.join(state.channel)
+                await self.__voice_state.channel_event(state.channel, event)
 
-    async def __join(self, state):
-        self.__vc = await state.channel.connect()
 
     @ext.commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
-        ...
-        # print('Update')
-        # if not before.channel and after.channel:
-        #     state = after
-        #     event = Join()
-        #     print(' Join')
-        # elif before.channel and not after.channel:
-        #     state = before
-        #     event = Leave()
-        #     print(' Leave')
-        # else:
-        #     return None
-        #
-        # self.__queue.add({
-        #     'state': state,
-        #     'event': event
-        # })
+        print(before, after)
+        if not before.channel and after.channel:
+            state = after
+            event = Join()
+        elif before.channel and not after.channel:
+            state = before
+            event = Leave()
+        else:
+            return None
+
+        self.__queue.add({
+            'state': state,
+            'event': event
+        })
 
 
 async def setup(bot: ext.commands.Bot):
