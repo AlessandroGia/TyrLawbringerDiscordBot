@@ -23,6 +23,11 @@ class CVoiceState:
 
     async def channel_event(self, channel: VoiceChannel, event: Join | Leave):
 
+        if not self.__connected():
+            self.__vc = await channel.connect()
+        else:
+            self.__vc.move_to(channel)
+
         if isinstance(event, Join):
             file = os.path.join(
                     self.__root, '..', 'voice', 'tyr', 'default', 'vvgh', 'Tyr_Other_G_H.ogg'
@@ -33,8 +38,3 @@ class CVoiceState:
             )
         elif isinstance(event, Leave):
             ...
-
-        if not self.__connected():
-            self.__vc = await channel.connect()
-        else:
-            self.__vc.move_to(channel)

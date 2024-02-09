@@ -53,26 +53,20 @@ class VoiceChannelCog(ext.commands.Cog):
         # print(neutral)
 
 
+
+
     @ext.commands.Cog.listener()
     async def on_ready(self):
         self.__run.start()
         ...
 
     @app_commands.command(
-        name='join',
-        description='Join the voice channel.'
+        name='start',
+        description='start the tyring.'
     )
-    async def join(self, interaction: Interaction):
-        print('a')
-        vc = await interaction.user.voice.channel.connect()
-        print('c')
+    async def start(self, interaction: Interaction):
 
-    @app_commands.command(
-        name='play',
-        description='Play a song.'
-    )
-    async def play(self, interaction: Interaction):
-        self.__vc.play("/Users/alessandro/Desktop/TyrLawbringerDiscordBot/Tyr_Kill_Tower_1.oga")
+
 
     def cog_unload(self):
         self.__run.cancel()
