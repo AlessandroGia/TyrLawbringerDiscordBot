@@ -1,15 +1,16 @@
 
 from discord import ext, Object, Member, VoiceState, VoiceClient, app_commands, Interaction
 from discord.ext import commands, tasks
+
+from src.exceptions.VoiceChannelExceptions import *
 from src.voicestate.CQueue import CQueue
 import asyncio
 
-from torch import nn
-import torch
+from src.checks.VoiceChannelChecks import check_voice_channel
 
+from src.embed.Embed import Embed
 from src.voicestate.CVoiceState import CVoiceState
 from src.voicestate.events.VoiceclientEvents import Join, Leave
-from transformers import BertForSequenceClassification, AutoTokenizer, pipeline
 
 
 class VoiceChannelCog(ext.commands.Cog):
@@ -18,54 +19,30 @@ class VoiceChannelCog(ext.commands.Cog):
     def __init__(self, bot: ext.commands.Bot):
         self.__voice_state = CVoiceState(bot.loop)
         self.__queue = CQueue()
-        self.__vc: VoiceClient | None = None
         self.__bot = bot
-        #
-        # model_name = "dbmdz/bert-base-italian-xxl-cased"
-        # #
-        # tokenizer = AutoTokenizer.from_pretrained(model_name)
-        # #
-        # model = BertForSequenceClassification.from_pretrained(model_name, num_labels=3)
-        # # nlp = pipeline("sentiment-analysis", model=pt_model, tokenizer=tokenizer)
-        # # results = nlp('cosa cazzo fai coglione!')
-        # # print(results)
-        #
-        # sentence = 'Huggingface è un team fantastico!'
-        # input_ids = tokenizer.encode(sentence, add_special_tokens=True)
-        #
-        # # Create tensor, use .cuda() to transfer the tensor to GPU
-        # tensor = torch.tensor(input_ids).long()
-        # # Fake batch dimension
-        # tensor = tensor.unsqueeze(0)
-        #
-        # # Call the model and get the logits
-        # logits, = model(tensor)
-        #
-        # # Remove the fake batch dimension
-        # logits = logits.squeeze(0)
-        #
-        # # The model was trained with a Log Likelyhood + Softmax combined loss, hence to extract probabilities we need a softmax on top of the logits tensor
-        # proba = nn.functional.softmax(logits, dim=0)
-        #
-        # # Unpack the tensor to obtain negative, neutral and positive probabilities
-        # negative, neutral, positive = proba
-        #
-        # print(neutral)
-
-
+        self.__embed = Embed()
 
 
     @ext.commands.Cog.listener()
     async def on_ready(self):
         self.__run.start()
-        ...
+
 
     @app_commands.command(
         name='start',
         description='start the tyring.'
     )
+    @check_voice_channel()
     async def start(self, interaction: Interaction):
+        await self.__voice_state.join(interaction)
 
+    @app_commands.command(
+        name='stop',
+        description='stop the tyring.'
+    )
+    @check_voice_channel()
+    async def stop(self, interaction: Interaction):
+        await self.__voice_state.disconnect()
 
 
     def cog_unload(self):
@@ -100,6 +77,21 @@ class VoiceChannelCog(ext.commands.Cog):
             'event': event
         })
 
+    @stop.error
+    async def leave_error(self, interaction: Interaction, error):
+        if isinstance(error, UserNonConnessoError):
+            await interaction.response.send_message(embed=self.__embed.error("Non sei connesso a nessun canale vocale"), ephemeral=True, delete_after=5)
+        elif isinstance(error, BotNonPresenteError):
+            await interaction.response.send_message(embed=self.__embed.error("Il bot non e' connesso a nessun canale vocale"), ephemeral=True, delete_after=5)
+        elif isinstance(error, UserNonStessoCanaleBotError):
+            await interaction.response.send_message(embed=self.__embed.error("Non sei nello stesso canale del bot"), ephemeral=True, delete_after=5)
+
+    @start.error
+    async def join_error(self, interaction: Interaction, error):
+        if isinstance(error, UserNonConnessoError):
+            await interaction.response.send_message(embed=self.__embed.error("Non sei connesso a nessun canale vocale"), ephemeral=True, delete_after=5)
+        elif isinstance(error, BotGiaConnessoError):
+            await interaction.response.send_message(embed=self.__embed.error("Bot gia' connesso"), ephemeral=True, delete_after=5)
 
 async def setup(bot: ext.commands.Bot):
     await bot.add_cog(VoiceChannelCog(bot), guilds=[Object(id=928785387239915540)])

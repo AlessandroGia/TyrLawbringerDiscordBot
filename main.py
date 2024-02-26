@@ -32,7 +32,7 @@ class TyrLawbringer(commands.Bot):
         for file in files:
             if file.endswith('.py'):
                 try:
-                    await self.load_extension(f'src.cogs.{file[:-3]}')
+                    await self.load_extension(f'checks.cogs.{file[:-3]}')
                     print(file[:-3], 'Loaded')
                 except Exception as e:
                     print(file[:-3], f'Not loaded: {e}')

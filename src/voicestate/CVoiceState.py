@@ -1,9 +1,10 @@
 import os
 import discord
 
+
 from asyncio import AbstractEventLoop
 
-from discord import VoiceClient, VoiceChannel, VoiceProtocol
+from discord import VoiceClient, VoiceChannel, Interaction
 
 from src.voicestate.events.VoiceclientEvents import *
 
@@ -14,6 +15,13 @@ class CVoiceState:
         self.__vc: VoiceClient | None = None
         self.__root: str = os.path.dirname(os.path.realpath(__file__))
 
+    async def join(self, interaction: Interaction):
+        self.__vc = await interaction.user.voice.channel.connect()
+
+    async def disconnect(self):
+        await self.__vc.disconnect()
+
+    
     def __connected(self):
         return self.__vc and isinstance(self.__vc, VoiceClient) and self.__vc.is_connected()
 
