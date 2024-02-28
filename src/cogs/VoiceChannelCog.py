@@ -17,24 +17,20 @@ class VoiceChannelCog(ext.commands.Cog):
     # {'member': member, 'state': state}
     #TODO: Fare una coda asincrona che tiene conto le varie operazione che il bot deve fare
     def __init__(self, bot: ext.commands.Bot):
-        self.__voice_state = CVoiceState(bot.loop)
-        self.__queue = CQueue()
         self.__bot = bot
+        self.__voice_state = CVoiceState(bot)
+        self.__queue = CQueue()
         self.__embed = Embed()
-
-
-    @ext.commands.Cog.listener()
-    async def on_ready(self):
-        self.__run.start()
-
 
     @app_commands.command(
         name='start',
         description='start the tyring.'
     )
-    @check_voice_channel()
     async def start(self, interaction: Interaction):
+        print('LEFFE')
+
         await self.__voice_state.join(interaction)
+
 
     @app_commands.command(
         name='stop',
@@ -42,6 +38,7 @@ class VoiceChannelCog(ext.commands.Cog):
     )
     @check_voice_channel()
     async def stop(self, interaction: Interaction):
+        print('totheto....')
         await self.__voice_state.disconnect()
 
 
@@ -50,6 +47,7 @@ class VoiceChannelCog(ext.commands.Cog):
 
     @tasks.loop()
     async def __run(self):
+        print("ANDICAPP")
         while True:
             element = await asyncio.wait_for(self.__queue.get(), timeout=None)
             await self.__on_user_event(element['state'], element['event'])

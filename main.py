@@ -24,15 +24,12 @@ class TyrLawbringer(commands.Bot):
         print("{} si e' connesso a discord!".format(self.user))
 
     async def load_cogs(self) -> None:
-        init: str = '__init__.py'
         root: str = os.path.dirname(os.path.abspath(__file__))
         files: list[str] = os.listdir(os.path.join(root, 'src', 'cogs'))
-        if init in files:
-            files.remove(init)
         for file in files:
-            if file.endswith('.py'):
+            if file.endswith('.py') and file != '__init__.py':
                 try:
-                    await self.load_extension(f'checks.cogs.{file[:-3]}')
+                    await self.load_extension(f'src.cogs.{file[:-3]}')
                     print(file[:-3], 'Loaded')
                 except Exception as e:
                     print(file[:-3], f'Not loaded: {e}')

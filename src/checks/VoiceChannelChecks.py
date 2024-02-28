@@ -1,3 +1,4 @@
+
 from discord import app_commands, utils, Interaction
 
 from src.exceptions.VoiceChannelExceptions import *
@@ -23,6 +24,6 @@ def check_voice_channel():
 
             if not interaction.user.voice.channel == __channel_connected_to(interaction).channel:
                 raise UserNonStessoCanaleBotError
-
+        print('indiprete')
         return True
     return app_commands.check(predicate)
