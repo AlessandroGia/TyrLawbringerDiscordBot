@@ -18,7 +18,6 @@ class CVoiceState:
         self.__user = bot.user
         self.__vc: VoiceClient | None = None
         self.__root: str = os.path.dirname(os.path.realpath(__file__))
-        print('AMDDADWDAX')
 
     async def join(self, interaction: Interaction):
         print('CISIA')

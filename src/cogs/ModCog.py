@@ -15,6 +15,7 @@ class Law(ext.commands.Cog):
         self.__leveling: Leveling = Leveling()
 
         self.__channel_bot: int = 1098908138570256464
+        self.__id_bot_role: int = 1006641555421016227
         self.__role_join: str = 'Yokai'
 
     @staticmethod
@@ -42,7 +43,7 @@ class Law(ext.commands.Cog):
 
     @set_points.error
     async def points_error(self, interaction: Interaction, error):
-        self.__not_permitted(interaction)
+        await self.__not_permitted(interaction)
 
     @app_commands.command(
         name='points',
@@ -62,7 +63,10 @@ class Law(ext.commands.Cog):
             )
 
     async def __ping_bot(self, message: Message) -> None:
-        if self.__bot.application.id in [mem.id for mem in message.mentions] and not self.__bot.application_id == message.author.id:
+        id_mentions = [mes.id for mes in message.mentions]
+        id_role_mentions = [role.id for role in message.role_mentions]
+        if self.__bot.application_id in id_mentions or self.__id_bot_role in id_role_mentions \
+            and not self.__bot.application_id == message.author.id:
             if message.author.id == message.guild.owner_id:
                 await message.channel.send(f'{message.author.mention} HAI!')
             else:
