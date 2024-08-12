@@ -1,5 +1,5 @@
 from discord import Object, Interaction, app_commands, ext, Message, Member
-from src.leveling.Leveling import Leveling
+from src.leveling.Exping import Leveling
 from discord.ext import commands
 
 import discord
@@ -10,47 +10,14 @@ from src.quotes.Quotes import Quotes
 class Law(ext.commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.__bot: commands.Bot = bot
-        self.__leveling: Leveling = Leveling()
         self.__quotes: Quotes = Quotes()
-        self.__leveling: Leveling = Leveling()
 
         self.__channel_bot: int = 1098908138570256464
         self.__id_bot_role: int = 1006641555421016227
         self.__role_join: str = 'Yokai'
 
-    @staticmethod
-    async def __not_permitted(interaction: Interaction):
-        await interaction.response.send_message("That's no funny!", ephemeral=True)
-
-    @staticmethod
-    def __is_owner(interaction: Interaction) -> bool:
-        return interaction.user.id == interaction.guild.owner.id
-
     def __id_bot(self, interaction: Interaction) -> bool:
         return interaction.user.id == self.__bot.application_id
-
-    @app_commands.command(
-        name='set-points',
-        description='Set user points.'
-    )
-    @app_commands.describe(
-        id='User id',
-        points='Number of points'
-    )
-    @app_commands.check(__is_owner)
-    async def set_points(self, interaction: Interaction, id: str, points: int) -> None:
-        await self.__leveling.set_user_points(interaction, int(id), points)
-
-    @set_points.error
-    async def points_error(self, interaction: Interaction, error):
-        await self.__not_permitted(interaction)
-
-    @app_commands.command(
-        name='points',
-        description='Get user points.'
-    )
-    async def points(self, interaction: Interaction) -> None:
-        await self.__leveling.get_user_points(interaction)
 
     async def __set_afk(self, message: Message) -> None:
         author_id: int = message.author.id
@@ -79,7 +46,6 @@ class Law(ext.commands.Cog):
         if message:
             await self.__set_afk(message)
             await self.__ping_bot(message)
-            #await self.__leveling.exp(message, self.__bot.application_id)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: Member) -> None:

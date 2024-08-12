@@ -1,5 +1,7 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
+from discord import Role
+from src.leveling.StatsInfo import STATS
 
 
 class Images:
@@ -13,10 +15,12 @@ class Images:
         self.__img_silver = Image.open(os.path.join(self.__root, 'ranks_symbols', '6a.png'))
         self.__img_bronze = Image.open(os.path.join(self.__root, 'ranks_symbols', '7a.png'))
 
-    def create_image(self, role_name: str, user_name: str, index: int) -> any:
-        len_name, len_rank = len(user_name) * 10, len(role_name) * 6
+    def create_image(self, role: Role, user_name: str) -> any:
+        len_name, len_rank = len(user_name) * 10, len(role.name) * 6
         len_w = len_name if len_name > len_rank else len_rank
-        img, rgb = self.__get_image_color_rank_by_index(index)
+        img, rgb = self.__get_image_color_rank_by_index(
+            list(STATS.keys()).index(role.id)
+        )
         img_w, img_h = img.size
         image = Image.new('RGBA', (150 + len_w, img_h), rgb)
         font_color = tuple([x - j for x, j in zip((255, 255, 255), rgb)])

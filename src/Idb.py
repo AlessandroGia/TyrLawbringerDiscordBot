@@ -1,5 +1,6 @@
 import redis
 
+
 class Idb:
     def __init__(self):
         self.__redis = redis.Redis(
@@ -8,13 +9,21 @@ class Idb:
             decode_responses=True
         )
 
-    def get_user_points_form_db(self, id_user: int, id_guild: int):
-        if user := self.__redis.hgetall(str(id_user)):
-            return int(user[str(id_guild)])
+    def get_user_points_db(self, guild_id: int, user_id: int) -> int:
+        if points := self.__redis.hget(str(guild_id), str(user_id)):
+            return int(points)
         return 0
 
-    def set_user_points_db(self, id_user: int, id_guild: int, points: int) -> None:
+    def increment_user_points_db(self, guild_id: int, user_id: int, points: int) -> None:
+        self.__redis.hincrby(
+            str(guild_id),
+            str(user_id),
+            points
+        )
+
+    def set_user_points_db(self, guild_id: int, user_id: int, points: int) -> None:
         self.__redis.hset(
-            str(id_user),
-            mapping={id_guild: points}
+            str(guild_id),
+            str(user_id),
+            str(points)
         )

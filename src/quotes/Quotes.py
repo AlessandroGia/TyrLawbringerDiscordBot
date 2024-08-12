@@ -1,4 +1,6 @@
 import random
+
+
 class Quotes:
 
     quotes_on_leave: list = [

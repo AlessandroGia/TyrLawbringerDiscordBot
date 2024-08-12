@@ -1,19 +1,123 @@
-from discord import Message, File, Interaction, Member, Guild
+from discord import Message, File, Interaction, Member, Guild, Member, Role
 
-from src.leveling.StatsInfo import StatsInfo
+from src.leveling.StatsInfo import STATS
 from src.leveling.Images import Images
 from src.Idb import Idb
 
 import io
 
 
-class Leveling:
+class Exping:
     def __init__(self) -> None:
         self.__stats = StatsInfo()
         self.__images = Images()
         self.__db = Idb()
-        self.__roles_id = self.__stats.get_all_roles_id()
+        self.__roles_id = set(STATS.keys())
         self.__tree = {}
+
+
+        self.__cache = {}
+
+
+    async def get_user_points(self, guild_id: int, user_id: int):
+        return self.__db.get_user_points_db(
+            guild_id,
+            user_id
+        )
+
+    async def set_user_points(self, guild_id: int, user: Member, points: int):
+        self.__db.set_user_points_db(
+            guild_id,
+            user.id,
+            points
+        )
+        await self.__check_role(
+            guild_id,
+            user
+        )
+
+    async def exp(self, mess: Message):
+        self.__db.increment_user_points_db(
+            mess.guild.id,
+            mess.author.id,
+            1
+        )
+        if role_id := await self.__check_role(mess.guild.id, mess.author):
+            await self.__send_lvl_up(
+                mess,
+                mess.guild.get_role(role_id)
+            )
+
+
+    def __points_to_next_lvl(self, guild_id: int, user_id: int):
+        points = self.__db.get_user_points_db(
+            guild_id,
+            user_id
+        )
+        for k in STATS.keys():
+            if points < k:
+                return k - points
+        return -1
+
+    async def __remove_old_roles(self, user: Member):
+        roles_to_remove = set(user.roles) & self.__roles_id
+        if roles_to_remove:
+            for role in roles_to_remove:
+                await user.remove_roles(role)
+
+    @staticmethod
+    async def __add_new_role(user: Member, role: Role):
+        await user.add_roles(role)
+
+    async def __update_roles(self, user: Member, role: Role):
+        await self.__remove_old_roles(user)
+        await self.__add_new_role(
+            user,
+            role
+        )
+
+    async def __check_role(self, guild_id: int, user: Member) -> int:
+        role_id = self.__get_role_by_points(
+            guild_id,
+            user.id,
+            self.__db.get_user_points_db(
+                guild_id,
+                user.id
+            )
+        )
+        all_user_roles = {role.id for role in user.roles} - {role_id}
+        if not role_id:
+            await self.__remove_old_roles(user)
+        elif role_id not in {role.id for role in user.roles} or any(role in all_user_roles for role in self.__roles_id):
+            await self.__update_roles(
+                user,
+                role_id
+            )
+            return role_id
+        return False
+
+    @staticmethod
+    def __get_role_by_points(guild_id: int, user_id: int, points: int):
+        last = None
+        for k, v in STATS.items():
+            if points >= k:
+                last = v
+            else:
+                break
+        return last
+
+    async def __send_lvl_up(self, ctx: Message, role: Role) -> None:
+        img = self.__images.create_image(
+            role,
+            ctx.author.name
+        )
+        with io.BytesIO() as image_binary:
+            img.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            await ctx.channel.send(
+                content=f'{ctx.author.mention} Nice Job!',
+                file=File(fp=image_binary, filename='image.png')
+            )
 
     async def get_user_points(self, interaction: Interaction):
         self.__update_user_points(interaction.user.id, interaction.guild.id)
@@ -42,7 +146,7 @@ class Leveling:
         )
 
     async def exp(self, ctx: Message, bot_id: int) -> None:
-        if ctx.author.id != bot_id:
+        if not ctx.author.bot and ctx.author.id != bot_id:
             self.__update_user_points(ctx.author.id, ctx.guild.id)
             self.__add_point(ctx.author.id, ctx.guild.id)
             index = self.__stats.get_index_by_points(self.__tree[ctx.author.id][ctx.guild.id]['points'])
@@ -99,6 +203,30 @@ class Leveling:
                 content=f'{ctx.author.mention} Nice Job!',
                 file=File(fp=image_binary, filename='image.png')
             )
+
+    def get_roles_and_points_to_lvl(self, interaction: Interaction):
+        current_role = None
+        role_after = None
+        current_threshold = 0
+        points_to_lvl = 0
+        points = self.__db.get_user_points_db(
+            interaction.guild.id,
+            interaction.user.id
+        )
+        for k, v in STATS.items():
+            if points >= k:
+                current_role = v
+                current_threshold = k
+            else:
+                role_after = v
+                points_to_lvl = k - points
+                break
+        return interaction.guild.get_role(current_role), interaction.guild.get_role(role_after), points_to_lvl
+
+
+
+
+
 
     async def __send_mess(self, interaction: Interaction, index: int, **kwargs):
         guild_id = interaction.guild.id
