@@ -19,7 +19,7 @@ class Images:
         len_name, len_rank = len(user_name) * 10, len(role.name) * 6
         len_w = len_name if len_name > len_rank else len_rank
         img, rgb = self.__get_image_color_rank_by_index(
-            list(STATS.keys()).index(role.id)
+            list(STATS.values()).index(role.id)
         )
         img_w, img_h = img.size
         image = Image.new('RGBA', (150 + len_w, img_h), rgb)
@@ -29,7 +29,7 @@ class Images:
         l_user.text((img_w + 10, 10), user_name, font=smite_font, fill=font_color)
         smite_font = ImageFont.truetype(os.path.join(self.__root, 'font', 'PenumbraHalfSerifStd-Bold.otf'), 10)
         l_rank = ImageDraw.Draw(image)
-        l_rank.text((img_w + 10, img_h - 20), role_name, font=smite_font, fill=font_color)
+        l_rank.text((img_w + 10, img_h - 20), role.name, font=smite_font, fill=font_color)
         image.paste(img)
         return image
 

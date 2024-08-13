@@ -1,10 +1,9 @@
 import io
 
-from discord import Object, Interaction, app_commands, ext, Message, Member, File
+from discord import Object, Interaction, app_commands, ext, Message, File
 from src.leveling.Exping import Exping
 from discord.ext import commands
 
-import discord
 
 from src.leveling.Images import Images
 
@@ -12,7 +11,7 @@ from src.leveling.Images import Images
 class Leveling(ext.commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.__bot: commands.Bot = bot
-        self.__exping: Exping = Exping()
+        self.__exping: Exping = Exping(bot)
         self.__images = Images()
 
     @staticmethod
@@ -36,17 +35,15 @@ class Leveling(ext.commands.Cog):
                 image_binary.seek(0)
                 desc = interaction.user.mention
                 if next_role:
-                    desc += f'***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
+                    desc += f' ***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
                 await interaction.response.send_message(
                     desc,
                     file=File(image_binary, 'level.png')
                 )
         else:
             await interaction.response.send_message(
-                'You have no roles.'
+                content=interaction.user.mention + f' ***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
             )
-
-
 
     @app_commands.command(
         name='points',
@@ -57,22 +54,25 @@ class Leveling(ext.commands.Cog):
             interaction.guild_id,
             interaction.user.id
         )
-        self.__send_mess(interaction)
+        await self.__send_mess(interaction)
 
     @app_commands.command(
         name='set-points',
         description='Set user points.'
     )
     @app_commands.describe(
-        id='User id',
+        user_id='User id',
         points='Number of points'
     )
     @app_commands.check(__is_owner)
-    async def set_points(self, interaction: Interaction, id: str, points: int) -> None:
+    async def set_points(self, interaction: Interaction, user_id: str, points: int) -> None:
         await self.__exping.set_user_points(
-            interaction.guild.id,
-            interaction.user,
+            interaction.guild_id,
+            interaction.guild.get_member(int(user_id)),
             points
+        )
+        await interaction.response.send_message(
+            f'{self.__bot.get_user(int(user_id)).name} has been set to {points} points.'
         )
 
     @set_points.error

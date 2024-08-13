@@ -1,5 +1,4 @@
 from discord import Object, Interaction, app_commands, ext, Message, Member
-from src.leveling.Exping import Leveling
 from discord.ext import commands
 
 import discord
