@@ -5,14 +5,13 @@ import discord
 
 from src.quotes.Quotes import Quotes
 
-
 class Law(ext.commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.__bot: commands.Bot = bot
         self.__quotes: Quotes = Quotes()
 
         self.__welcome_channel: int = 1098908138570256464
-        self.__id_bot_role: int = 1006641555421016227
+        self.__id_tyr_role: int = 1236374893797445693
         self.__role_join: int = 928793792994213908
 
     async def __set_afk(self, message: Message) -> None:
@@ -26,9 +25,9 @@ class Law(ext.commands.Cog):
             )
 
     async def __ping_bot(self, message: Message) -> None:
-        id_mentions = [mes.id for mes in message.mentions]
-        id_role_mentions = [role.id for role in message.role_mentions]
-        if self.__bot.application_id in id_mentions or self.__id_bot_role in id_role_mentions:
+        id_mentions: set[int] = {mes.id for mes in message.mentions}
+        id_role_mentions: set[int] = {role.id for role in message.role_mentions}
+        if self.__bot.application_id in id_mentions or self.__id_tyr_role in id_role_mentions:
             if message.author.id == message.guild.owner_id:
                 await message.reply(
                     content=f'HAI!',
@@ -48,8 +47,8 @@ class Law(ext.commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: Member) -> None:
-        role = member.guild.get_role(self.__role_join)
-        channel = member.guild.get_channel(self.__welcome_channel)
+        role: discord.Role = member.guild.get_role(self.__role_join)
+        channel: discord.TextChannel = member.guild.get_channel(self.__welcome_channel)
         await member.add_roles(role)
         await channel.send(
             content=self.__quotes.get_random(self.__quotes.quotes_on_join),
@@ -58,7 +57,7 @@ class Law(ext.commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: Member) -> None:
-        channel = member.guild.get_channel(self.__welcome_channel)
+        channel: discord.TextChannel = member.guild.get_channel(self.__welcome_channel)
         await channel.send(
             content=self.__quotes.get_random(self.__quotes.quotes_on_leave),
             mention_author=True
@@ -66,7 +65,7 @@ class Law(ext.commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, member: Member) -> None:
-        channel = member.guild.get_channel(self.__welcome_channel)
+        channel: discord.TextChannel = member.guild.get_channel(self.__welcome_channel)
         await channel.send(
             content=self.__quotes.get_random(self.__quotes.quotes_on_ban),
             mention_author=True

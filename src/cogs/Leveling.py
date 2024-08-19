@@ -6,27 +6,23 @@ from discord.ext import commands
 
 
 from src.leveling.Images import Images
+from PIL import Image
 
 
 class Leveling(ext.commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.__bot: commands.Bot = bot
         self.__exping: Exping = Exping(bot)
-        self.__images = Images()
+        self.__images: Images = Images()
 
     @staticmethod
     def __is_owner(interaction: Interaction) -> bool:
         return interaction.user.id == interaction.guild.owner.id
 
-    @commands.Cog.listener()
-    async def on_message(self, message: Message) -> None:
-        if not message.author.bot:
-            await self.__exping.exp(message)
-
     async def __send_mess(self, interaction: Interaction) -> None:
         current_role, next_role, points_to_lvl = self.__exping.get_roles_and_points_to_lvl(interaction)
         if current_role:
-            img = self.__images.create_image(
+            img: Image = self.__images.create_image(
                 current_role,
                 interaction.user.name
             )
@@ -81,6 +77,11 @@ class Leveling(ext.commands.Cog):
             "That's no funny!",
             ephemeral=True
         )
+
+    @commands.Cog.listener()
+    async def on_message(self, message: Message) -> None:
+        if not message.author.bot:
+            await self.__exping.exp(message)
 
 
 async def setup(bot: ext.commands.Bot) -> None:

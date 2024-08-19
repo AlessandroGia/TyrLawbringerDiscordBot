@@ -15,7 +15,7 @@ class Images:
         self.__img_silver = Image.open(os.path.join(self.__root, 'ranks_symbols', '6a.png'))
         self.__img_bronze = Image.open(os.path.join(self.__root, 'ranks_symbols', '7a.png'))
 
-    def create_image(self, role: Role, user_name: str) -> any:
+    def create_image(self, role: Role, user_name: str) -> Image:
         len_name, len_rank = len(user_name) * 10, len(role.name) * 6
         len_w = len_name if len_name > len_rank else len_rank
         img, rgb = self.__get_image_color_rank_by_index(
