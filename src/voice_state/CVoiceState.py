@@ -7,8 +7,8 @@ from asyncio import AbstractEventLoop
 from discord import VoiceClient, VoiceChannel, Interaction, ext
 
 
-from src.voicestate.PickLine import PickLine
-from src.voicestate.events.VoiceclientEvents import *
+from src.voice_state.PickLine import PickLine
+from src.voice_state.events.VoiceclientEvents import *
 
 
 class CVoiceState:

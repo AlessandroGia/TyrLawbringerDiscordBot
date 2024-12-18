@@ -1,11 +1,15 @@
+import asyncio
 import io
 
+import discord
 from discord import Object, Interaction, app_commands, ext, Message, File
-from src.leveling.Exping import Exping
+from discord.app_commands import Transform
+
+from src.custom_transformers.custom_transformers import GuildUsers
+from src.leveling.exping import Exping
 from discord.ext import commands
 
-
-from src.leveling.Images import Images
+from src.leveling.images import Images
 from PIL import Image
 
 
@@ -15,12 +19,12 @@ class Leveling(ext.commands.Cog):
         self.__exping: Exping = Exping(bot)
         self.__images: Images = Images()
 
-    @staticmethod
-    def __is_owner(interaction: Interaction) -> bool:
-        return interaction.user.id == interaction.guild.owner.id
-
     async def __send_mess(self, interaction: Interaction) -> None:
         current_role, next_role, points_to_lvl = self.__exping.get_roles_and_points_to_lvl(interaction)
+        desc = interaction.user.mention
+
+        if next_role:
+            desc += f' ***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
         if current_role:
             img: Image = self.__images.create_image(
                 current_role,
@@ -29,17 +33,10 @@ class Leveling(ext.commands.Cog):
             with io.BytesIO() as image_binary:
                 img.save(image_binary, 'PNG')
                 image_binary.seek(0)
-                desc = interaction.user.mention
-                if next_role:
-                    desc += f' ***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
-                await interaction.response.send_message(
-                    desc,
-                    file=File(image_binary, 'level.png')
-                )
+                file = File(image_binary, 'level.png')
+                await interaction.response.send_message(desc, file=file)
         else:
-            await interaction.response.send_message(
-                content=interaction.user.mention + f' ***{points_to_lvl}pt.*** left to rank up to **{next_role.name}**.'
-            )
+            await interaction.response.send_message(content=desc)
 
     @app_commands.command(
         name='points',
@@ -57,32 +54,39 @@ class Leveling(ext.commands.Cog):
         description='Set user points.'
     )
     @app_commands.describe(
-        user_id='User id',
+        user='Username',
         points='Number of points'
     )
-    @app_commands.check(__is_owner)
-    async def set_points(self, interaction: Interaction, user_id: str, points: int) -> None:
+    @commands.is_owner()
+    async def set_points(self, interaction: Interaction, user: Transform[discord.Member, GuildUsers], points: app_commands.Range[int, 0]) -> None:
         await self.__exping.set_user_points(
             interaction.guild_id,
-            interaction.guild.get_member(int(user_id)),
+            user,
             points
         )
         await interaction.response.send_message(
-            f'{self.__bot.get_user(int(user_id)).name} has been set to {points} points.'
+            f'{user.display_name} has been set to {points} points.'
         )
 
     @set_points.error
     async def points_error(self, interaction: Interaction, error):
-        await interaction.response.send_message(
-            "That's no funny!",
-            ephemeral=True
-        )
+        if isinstance(error, commands.errors.CheckFailure):
+            await interaction.response.send_message(
+                "That's no funny!",
+                ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                "Error",
+                ephemeral=True
+            )
+
 
     @commands.Cog.listener()
     async def on_message(self, message: Message) -> None:
         if not message.author.bot:
-            await self.__exping.exp(message)
-
+            #await self.__exping.exp(message)
+            ...
 
 async def setup(bot: ext.commands.Bot) -> None:
     await bot.add_cog(

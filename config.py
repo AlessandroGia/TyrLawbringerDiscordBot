@@ -1,0 +1,1 @@
+waiting_typing = lambda x:  len(x) / 8
