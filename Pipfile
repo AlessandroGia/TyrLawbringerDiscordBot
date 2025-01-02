@@ -8,6 +8,8 @@ name = "pypi"
 pillow = "*"
 redis = "*"
 python-dotenv = "*"
+PyNaCl = "*"
+requests = "*"
 
 [dev-packages]
 
