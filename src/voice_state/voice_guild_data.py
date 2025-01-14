@@ -1,19 +1,19 @@
-from discord import Client, Guild
+from discord import Guild
 from discord import Member, VoiceChannel
 
 
 class VoiceGuildData:
     def __init__(self):
         self.__temp_channels_names = {'Gi', 'Yu', 'Jin', 'Rei', 'Makoto', 'Meiyo', 'Chugi'}
-        self.__prive: list[Member] = []
+        self.__private: list[Member] = []
         self.__temp_channels: list[VoiceChannel] = []
 
-    def add_member_to_prive(self, user: Member):
-        self.__prive.append(user)
+    def add_member_to_private(self, user: Member):
+        self.__private.append(user)
 
-    def pop_member_in_prive(self, user: Member) -> bool:
-        if user in self.__prive:
-            self.__prive.remove(user)
+    def pop_member_in_private(self, user: Member) -> bool:
+        if user in self.__private:
+            self.__private.remove(user)
             return True
         return False
 
@@ -34,7 +34,6 @@ class VoiceGuildData:
     async def remove_temp_channel(self):
         for channel in self.__temp_channels:
             if not channel.members:
-                print('remove', channel.name)
                 await channel.delete()
                 self.__temp_channels.remove(channel)
                 break

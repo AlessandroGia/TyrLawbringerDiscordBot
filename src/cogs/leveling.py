@@ -5,6 +5,7 @@ import discord
 from discord import Object, Interaction, app_commands, ext, Message, File
 from discord.app_commands import Transform
 
+from config import Config
 from src.custom_transformers.custom_transformers import GuildUsers
 from src.leveling.exping import Exping
 from discord.ext import commands
@@ -28,7 +29,7 @@ class Leveling(ext.commands.Cog):
         if current_role:
             img: Image = self.__images.create_image(
                 current_role,
-                interaction.user.name
+                interaction.user.display_name
             )
             with io.BytesIO() as image_binary:
                 img.save(image_binary, 'PNG')
@@ -89,9 +90,4 @@ class Leveling(ext.commands.Cog):
             ...
 
 async def setup(bot: ext.commands.Bot) -> None:
-    await bot.add_cog(
-        Leveling(bot),
-        guilds=[
-            Object(id=928785387239915540)
-        ]
-    )
+    await bot.add_cog(Leveling(bot))

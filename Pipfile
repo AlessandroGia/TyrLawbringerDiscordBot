@@ -10,6 +10,7 @@ redis = "*"
 python-dotenv = "*"
 PyNaCl = "*"
 requests = "*"
+pyyaml = "*"
 
 [dev-packages]
 

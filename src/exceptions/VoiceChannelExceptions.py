@@ -1,17 +1,17 @@
 from discord.app_commands import AppCommandError
 
 
-class UserNonConnessoError(AppCommandError):
+class UserNotConnected(AppCommandError):
     pass
 
 
-class BotGiaConnessoError(AppCommandError):
+class BotAlreadyConnected(AppCommandError):
     pass
 
 
-class BotNonPresenteError(AppCommandError):
+class BotNotConnected(AppCommandError):
     pass
 
 
-class UserNonStessoCanaleBotError(AppCommandError):
+class UserNotInBotVc(AppCommandError):
     pass

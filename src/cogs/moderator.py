@@ -5,9 +5,9 @@ import discord
 from discord import Object, ext, Message, Member, app_commands, Interaction, VoiceState
 from discord.app_commands import Transform
 
-from src.custom_transformers.custom_transformers import GuildUsers
+from src.custom_transformers.custom_transformers import ChannelUsers
 from src.quotes.quotes import Quotes
-from config import waiting_typing
+from config import waiting_typing, Config
 from discord.ext import commands
 from enum import Enum
 
@@ -23,20 +23,20 @@ class Law(ext.commands.Cog):
         self.__bot: commands.Bot = bot
         self.__quotes: Quotes = Quotes()
 
-        self.__welcome_channel: int = 1098908138570256464
-        self.__id_tyr_role: int = 1236374893797445693
-        self.__role_join: int = 928793792994213908
+        config = Config()
+
+        self.__welcome_channel: int = int(config.get('channels.welcome'))
+        self.__id_tyr_role: int = int(config.get('roles.tyr'))
+        self.__role_join: int = int(config.get('roles.join'))
 
     @app_commands.command(
         name='ping',
         description='Fa pingare l\'utente.'
     )
-    async def ping(self, interaction: Interaction, user: Transform[discord.Member, GuildUsers]) -> None:
+    async def ping(self, interaction: Interaction, user: Transform[discord.Member, ChannelUsers]) -> None:
         await interaction.response.send_message(
-            
-            content=f'{user.mention}'
+            user.mention,
         )
-        await interaction.response.m
 
     @commands.Cog.listener()
     async def on_message(self, message: Message) -> None:
@@ -100,9 +100,4 @@ class Law(ext.commands.Cog):
             await channel.send(content=content, mention_author=True)
 
 async def setup(bot: ext.commands.Bot) -> None:
-    await bot.add_cog(
-        Law(bot),
-        guilds=[
-            Object(id=928785387239915540)
-        ]
-    )
+    await bot.add_cog(Law(bot))

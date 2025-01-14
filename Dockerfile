@@ -10,4 +10,6 @@ RUN pipenv install
 
 COPY . .
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 CMD ["pipenv", "run", "python3", "-u", "main.py"]
