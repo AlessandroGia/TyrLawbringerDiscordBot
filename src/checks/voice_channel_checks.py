@@ -2,7 +2,7 @@
 from discord import app_commands, utils, Interaction, VoiceChannel, VoiceProtocol
 
 from config import Config
-from src.exceptions.VoiceChannelExceptions import *
+from src.exceptions.voice_channel_exceptions import *
 
 config = Config()
 

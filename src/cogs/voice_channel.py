@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from src.checks.voice_channel_checks import check_voice_channel
 from src.custom_transformers.custom_transformers import GuildUsersVip, GuildUsers, Skins
-from src.exceptions.VoiceChannelExceptions import UserNotConnected, BotNotConnected, BotAlreadyConnected, UserNotInBotVc
+from src.exceptions.voice_channel_exceptions import UserNotConnected, BotNotConnected, BotAlreadyConnected, UserNotInBotVc
 from src.exceptions.vgs_exceptions import InexistentVGS, MissingVGS, InexistentSkin
 
 from src.embed.embed import EmbedFactory
