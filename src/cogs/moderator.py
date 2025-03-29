@@ -34,9 +34,7 @@ class Law(ext.commands.Cog):
         description='Fa pingare l\'utente.'
     )
     async def ping(self, interaction: Interaction, user: Transform[discord.Member, ChannelUsers]) -> None:
-        await interaction.response.send_message(
-            user.mention,
-        )
+        await interaction.response.send_message(user.mention)
 
     @commands.Cog.listener()
     async def on_message(self, message: Message) -> None:
@@ -73,14 +71,14 @@ class Law(ext.commands.Cog):
             and owner.status in {discord.Status.idle, discord.Status.offline, discord.Status.dnd}
             and owner in message.mentions
         ):
-            content = self.__quotes.get_random(self.__quotes.quotes_on_ban)
+            content = self.__quotes.get_random("quotes_on_ban")
             async with message.channel.typing():
                 await asyncio.sleep(waiting_typing(content))
             await message.reply(content=content, mention_author=True)
 
     async def __ping_bot(self, message: Message) -> None:
         if self.__bot.application_id in {m.id for m in message.mentions} or self.__id_tyr_role in {r.id for r in message.role_mentions}:
-            content = 'HAI!' if message.author.id == message.guild.owner_id else self.__quotes.get_random(self.__quotes.quotes_on_ping)
+            content = 'HAI!' if message.author.id == message.guild.owner_id else self.__quotes.get_random("quotes_on_ping")
             async with message.channel.typing():
                 await asyncio.sleep(waiting_typing(content))
             await message.reply(content=content, mention_author=True)
@@ -88,11 +86,11 @@ class Law(ext.commands.Cog):
     async def __send_from_event(self, action: Actions, channel: discord.TextChannel) -> None:
         content: str = ''
         if action == Actions.JOIN:
-            content = self.__quotes.get_random(self.__quotes.quotes_on_join)
+            content = self.__quotes.get_random("quotes_on_join")
         elif action == Actions.LEAVE:
-            content = self.__quotes.get_random(self.__quotes.quotes_on_leave)
+            content = self.__quotes.get_random("quotes_on_leave")
         elif action == Actions.BAN:
-            content = self.__quotes.get_random(self.__quotes.quotes_on_ban)
+            content = self.__quotes.get_random("quotes_on_ban")
 
         if content:
             async with channel.typing():
