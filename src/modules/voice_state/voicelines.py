@@ -6,7 +6,7 @@ from random import choice
 
 class VoiceLines:
     def __init__(self):
-        self.__voice_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'voice', 'tyr')
+        self.__voice_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'audio', 'tyr')
 
     def get_skins_name(self) -> dict[str, str]:
         skins = {}

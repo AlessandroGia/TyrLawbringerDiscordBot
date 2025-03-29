@@ -1,19 +1,24 @@
-version: '3'
-
 services:
   bot:
     container_name: tyr_lawbringer
     build: .
     networks:
       - network
+    volumes:
+      - ./src/data:/app/src/data
     depends_on:
       - db
   db:
     image: redis:7.0.11
     ports:
       - 6379:6379
+    volumes:
+      - redis_data:/data
     networks:
       - network
+
+volumes:
+  redis_data:
 
 networks:
   network:

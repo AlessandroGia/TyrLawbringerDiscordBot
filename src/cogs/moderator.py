@@ -2,11 +2,11 @@ import asyncio
 
 import discord
 
-from discord import Object, ext, Message, Member, app_commands, Interaction, VoiceState
+from discord import ext, Message, Member, app_commands, Interaction
 from discord.app_commands import Transform
 
-from src.custom_transformers.custom_transformers import ChannelUsers
-from src.quotes.quotes import Quotes
+from src.converters.user_converter import ChannelUsers
+from src.modules.quotes.quotes_handler import Quotes
 from config import waiting_typing, Config
 from discord.ext import commands
 from enum import Enum

@@ -1,16 +1,14 @@
-import asyncio
 import io
 
 import discord
-from discord import Object, Interaction, app_commands, ext, Message, File
+from discord import Interaction, app_commands, ext, Message, File
 from discord.app_commands import Transform
 
-from config import Config
-from src.custom_transformers.custom_transformers import GuildUsers
-from src.leveling.exping import Exping
+from src.converters.user_converter import GuildUsers
+from src.modules.leveling.exping import Exping
 from discord.ext import commands
 
-from src.leveling.images import Images
+from src.modules.leveling.images import Images
 from PIL import Image
 
 
@@ -86,8 +84,7 @@ class Leveling(ext.commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: Message) -> None:
         if not message.author.bot:
-            #await self.__exping.exp(message)
-            ...
+            await self.__exping.exp(message)
 
 async def setup(bot: ext.commands.Bot) -> None:
     await bot.add_cog(Leveling(bot))

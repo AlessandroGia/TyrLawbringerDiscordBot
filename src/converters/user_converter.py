@@ -1,9 +1,4 @@
-from typing import Any, Optional
-
 from discord import app_commands, Interaction, Member
-from discord.ext.commands import Command
-
-from src.voice_state.voicelines import VoiceLines
 
 
 def autocomplete_value(members: list[Member], value: str) -> list[app_commands.Choice]:
@@ -56,19 +51,3 @@ class ChannelUsers(app_commands.Transformer):
         if not member:
             raise
         return member
-
-class Skins(app_commands.Transformer):
-
-    def __init__(self):
-        voice_lines: VoiceLines = VoiceLines()
-        self.__skins: dict = voice_lines.get_skins_name()
-
-    async def autocomplete(self, interaction: Interaction, value: str, /) -> list[app_commands.Choice]:
-        return [
-            app_commands.Choice(name=skin_name, value=skin)
-            for skin, skin_name in self.__skins.items()
-            if not value or value.lower() in skin_name.lower
-        ]
-
-    async def transform(self, interaction: Interaction, value: str, /) -> str:
-        return value

@@ -7,7 +7,7 @@ class EmbedFactory:
     def __init__(self) -> None:
         self.__name_bot = "Tyr"
         self.__icon_url = "https://webcdn.hirezstudios.com/smite/god-icons/tyr.jpg"
-        self.__icons_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'images')
+        self.__icons_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets')
 
     def error(self, error: str = " ") -> Embed:
         embed = Embed(title=" ", description="***"+error+"***", colour=Colour.red())

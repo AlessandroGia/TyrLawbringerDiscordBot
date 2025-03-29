@@ -1,21 +1,20 @@
 import asyncio
-import os.path
 from asyncio import Event
 
 import discord
-from discord import ext, Object, Member, VoiceState, VoiceClient, app_commands, Interaction, VoiceChannel, utils, \
-    VoiceProtocol
+from discord import ext, Member, VoiceState, VoiceClient, app_commands, Interaction, VoiceChannel
 from discord.app_commands import Transform
 from discord.ext import commands
 
-from src.checks.voice_channel_checks import check_voice_channel
-from src.custom_transformers.custom_transformers import GuildUsersVip, GuildUsers, Skins
+from src.validators.voice_validator import check_voice_channel
+from src.converters.user_converter import GuildUsersVip, GuildUsers
+from src.converters.vgs_converter import Skins
 from src.exceptions.voice_channel_exceptions import UserNotConnected, BotNotConnected, BotAlreadyConnected, UserNotInBotVc
 from src.exceptions.vgs_exceptions import InexistentVGS, MissingVGS, InexistentSkin
 
 from src.embed.embed import EmbedFactory
-from src.voice_state.voice_guild_data import VoiceGuildData
-from src.voice_state.voicelines import VoiceLines
+from src.modules.voice_state.voice_guild_data import VoiceGuildData
+from src.modules.voice_state.voicelines import VoiceLines
 from config import Config
 
 

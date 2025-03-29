@@ -23,7 +23,8 @@ def check_voice_channel():
 
         if interaction.command.name == 'join':
 
-            if __channel_connected_to(interaction) and __channel_connected_to(interaction).channel != private_channel:
+            if (__channel_connected_to(interaction) and __channel_connected_to(interaction).channel != private_channel or
+                    __channel_connected_to(interaction).channel == interaction.user.voice.channel == private_channel):
                 raise BotAlreadyConnected
 
         else:

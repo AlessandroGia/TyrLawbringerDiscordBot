@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 from discord import Role
-from src.leveling.stats_info import STATS
+from src.modules.leveling.stats_info import STATS
 
 
 class Images:

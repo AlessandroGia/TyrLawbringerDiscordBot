@@ -3,11 +3,10 @@ import asyncio
 from discord import Message, File, Interaction, Member, Role, TextChannel
 from discord.ext import commands
 
-from src.leveling.stats_info import STATS
-from src.leveling.images import Images
+from src.modules.leveling.stats_info import STATS
+from src.modules.leveling.images import Images
 from src.db.db import DB
 
-import discord
 import io
 
 from config import waiting_typing
