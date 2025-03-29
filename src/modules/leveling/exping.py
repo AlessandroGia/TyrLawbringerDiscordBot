@@ -81,7 +81,7 @@ class Exping:
         return role_id
 
     async def __send_lvl_up(self, channel: TextChannel, author: Member, role: Role) -> None:
-        img = self.__images.create_image(role, author.name)
+        img = self.__images.create_image(role, author.display_name)
         content = f'{author.mention} Nice Job!'
 
         with io.BytesIO() as image_binary:
